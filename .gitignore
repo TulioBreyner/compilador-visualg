@@ -1,0 +1,24 @@
+# Executáveis
+tradutor
+*.exe
+!tools/visualgv25.exe
+*.out
+
+# Arquivos objeto e temporários de compilação
+*.o
+*.obj
+
+# Arquivos gerados pelo Flex e Bison
+src/lex.yy.c
+src/*.tab.c
+src/*.tab.h
+
+# macOS
+.DS_Store
+*.dSYM/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
