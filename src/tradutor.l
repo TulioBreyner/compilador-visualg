@@ -3,7 +3,7 @@
     #include <string.h>
     #include "ast.h"              /* ast_node precisa ser conhecido antes do tab.h */
     #include "tradutor.tab.h" /* Arquivo de cabeçalho gerado pelo Bison com os tokens */
-    
+
     static char *xstrdup(const char *s);
 %}
 
@@ -12,111 +12,204 @@
 %option noinput
 %option nounput
 %option yylineno
+/* case-insensitive: VisuAlg is case-insensitive */
+%option case-insensitive
 
 %%
 
- /* Delimitacoes */
-"algoritmo"			{ return ALGORITMO; }
-"inicio"			{ return INICIO; }
-"var"|"declare"		{ return VAR; }
-"fimalgoritmo"		{ return FIMALGORITMO; }
+ /* ================================================================ */
+ /* Delimitacoes estruturais do programa                             */
+ /* ================================================================ */
+"algoritmo"             { return ALGORITMO; }
+"inicio"                { return INICIO; }
+"fimalgoritmo"          { return FIMALGORITMO; }
 
- /* Tipos de dados */
-"int" |
-"inteiro"			{ return INT; }
+ /* Declaracao de variaveis */
+"var"|"declare"         { return VAR; }
 
-"real" |
-"numerico" 			{ return REAL; }
+ /* ================================================================ */
+ /* Tipos de dados                                                   */
+ /* ================================================================ */
+"inteiro"|"int"                         { return INTEIRO; }
+"real"|"numerico"                       { return REAL; }
+"caracter"|"caractere"|"literal"        { return CARACTERE; }
+"logico"                                { return LOGICO; }
+"vetor"                                 { return VETOR; }
 
-"caractere" |
-"caracter" |
-"literal" 	        { return CARACTERE; }
+ /* ================================================================ */
+ /* Estruturas condicionais                                          */
+ /* ================================================================ */
+"se"                    { return SE; }
+"entao"                 { return ENTAO; }
+"senao"                 { return SENAO; }
+"fimse"                 { return FIMSE; }
 
-"logico"    		{ return LOGICO; }
+"escolha"               { return ESCOLHA; }
+"caso"                  { return CASO; }
+"outrocaso"             { return OUTROCASO; }
+"fimescolha"            { return FIMESCOLHA; }
 
+ /* ================================================================ */
+ /* Estruturas de repeticao                                          */
+ /* ================================================================ */
+"para"                  { return PARA; }
+"de"                    { return DE; }
+"ate"                   { return ATE; }
+"passo"                 { return PASSO; }
+"faca"                  { return FACA; }
+"fimpara"               { return FIMPARA; }
 
+"enquanto"              { return ENQUANTO; }
+"fimenquanto"           { return FIMENQUANTO; }
 
- /* comandos para mostrar a tabela de símbolos no terminal */
-"vars" | 
-"tabela" | 
-"print"     { return VARS; }
+"repita"                { return REPITA; }
+"fimrepita"             { return FIMREPITA; }
 
-"sair" | 
-"quit"      { return SAIR; }
+"interrompa"            { return INTERROMPA; }
 
-"ajuda" |
-"help"      { return HELP; }
+ /* ================================================================ */
+ /* Subprogramas (procedimentos e funcoes)                           */
+ /* ================================================================ */
+"procedimento"          { return PROCEDIMENTO; }
+"fimprocedimento"       { return FIMPROCEDIMENTO; }
+"funcao"                { return FUNCAO; }
+"fimfuncao"             { return FIMFUNCAO; }
+"retorne"               { return RETORNE; }
 
-"sin" | 
-"cos" | 
-"tan" | 
-"asin" | 
-"acos" | 
-"atan" | 
-"sinh" | 
-"cosh" | 
-"tanh" | 
-"exp" | 
-"round" | 
-"sqrt" | 
-"log" | 
-"log2" | 
-"log10" | 
-"floor" | 
-"ceil" | 
-"abs" | 
-"fabs" | 
-"pow" | 
-"atan2" |
-"hypot" | 
-"fmod" | 
-"trunc" | 
-"gamma"  | 
-"lgamma" {
-                  yylval.sval = xstrdup(yytext);
-                  return FUNC;
-                }
+ /* ================================================================ */
+ /* Comandos de entrada e saida                                      */
+ /* ================================================================ */
+"leia"                  { return LEIA; }
+"escreva"               { return ESCREVA; }
+"escreval"              { return ESCREVAL; }
 
- /* números: inteiro, decimal, notação científica */
+ /* ================================================================ */
+ /* Operadores logicos (palavras-chave)                              */
+ /* ================================================================ */
+"e"                     { return E; }
+"ou"                    { return OU; }
+"nao"                   { return NAO; }
+"xou"                   { return XOU; }
+
+ /* ================================================================ */
+ /* Literais booleanos                                               */
+ /* ================================================================ */
+"verdadeiro"            { return VERDADEIRO; }
+"falso"                 { return FALSO; }
+
+ /* ================================================================ */
+ /* Comandos/diretivas especiais do VisuAlg                         */
+ /* ================================================================ */
+"aleatorio"             { return ALEATORIO; }
+"arquivo"               { return ARQUIVO; }
+"cronometro"            { return CRONOMETRO; }
+"debug"                 { return DEBUG; }
+"eco"                   { return ECO; }
+"mensagem"              { return MENSAGEM; }
+"pausa"                 { return PAUSA; }
+"timer"                 { return TIMER; }
+"limpatela"             { return LIMPATELA; }
+
+ /* ================================================================ */
+ /* Funcoes matematicas predefinidas                                 */
+ /* ================================================================ */
+"abs"|"arccos"|"arcsen"|"arctan"|"cos"|"cotan"|"exp"|"grauprad"|"log"|"logn"|"quad"|"radpgrau"|"raizq"|"rand"|"randi"|"sen"|"tan" {
+                yylval.sval = xstrdup(yytext);
+                return FUNC_MAT;
+            }
+
+ /* ================================================================ */
+ /* Funcoes de string predefinidas                                   */
+ /* ================================================================ */
+"asc"|"compr"|"copia"|"maiusc"|"minusc"|"numpcarac"|"pos" {
+                yylval.sval = xstrdup(yytext);
+                return FUNC_STR;
+            }
+
+ /* ================================================================ */
+ /* Constante predefinida                                            */
+ /* ================================================================ */
+"pi"            { return PI; }
+
+ /* ================================================================ */
+ /* Comandos auxiliares do interpretador (modo interativo)          */
+ /* ================================================================ */
+"vars"|"tabela"|"print"     { return VARS; }
+"sair"|"quit"               { return SAIR; }
+"ajuda"|"help"              { return HELP; }
+
+ /* ================================================================ */
+ /* Literais numericos: inteiro, decimal e notacao cientifica       */
+ /* ================================================================ */
 ([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][+-]?[0-9]+)? {
-                yylval.dval = strtod(yytext, NULL); // converte o lexema de string para double
-                return NUM; 
-            } 
+                yylval.dval = strtod(yytext, NULL);
+                return NUM;
+            }
 
- /* identificadores: variáveis */
-[a-zA-Z_][a-zA-Z0-9_]*      {
-                yylval.sval = xstrdup(yytext);  // copia o lexema para o atributo do token ID
+ /* ================================================================ */
+ /* Literais de cadeia de caracteres (strings entre aspas duplas)   */
+ /* ================================================================ */
+\"([^\"\n])*\"  {
+                yylval.sval = xstrdup(yytext);
+                return STRING_LITERAL;
+            }
+
+ /* ================================================================ */
+ /* Identificadores: variaveis e nomes de subprogramas              */
+ /* ================================================================ */
+[a-zA-Z_][a-zA-Z0-9_]*  {
+                yylval.sval = xstrdup(yytext);
                 return ID;
             }
 
-[ \t\r]+    { /* Ignora espaços em branco e tabulações */ }
+ /* ================================================================ */
+ /* Espacos em branco e comentarios                                  */
+ /* ================================================================ */
+[ \t\r]+        { /* ignora espacos, tabulacoes e retorno de carro */ }
 
- /* operadores e parênteses */
-"," |
-"=" | 
-"+" | 
-"-" | 
-"*" | 
-"^" | 
-"!" | 
-"/" | 
-"(" | 
-")"         { return yytext[0]; }
+"//"[^\n]*      { /* ignora comentarios de linha (estilo VisuAlg)  */ }
 
-\n          { return EOL; } /* Fim de linha */
+ /* ================================================================ */
+ /* Operadores e pontuacao                                           */
+ /* ================================================================ */
+"<-"            { return ATRIB; }   /* operador de atribuicao do VisuAlg */
+"<>"            { return NEQ; }     /* diferente de                      */
+">="            { return GEQ; }     /* maior ou igual a                  */
+"<="            { return LEQ; }     /* menor ou igual a                  */
+">"             { return GT; }      /* maior que                         */
+"<"             { return LT; }      /* menor que                         */
+"="             { return EQ; }      /* igual a (comparacao)              */
 
- /* .           { fprintf(stderr, "Caractere invalido: %s\n", yytext); }  */
-.           { return yytext[0]; } // deixa o parser cuidar dos caracteres desconhecidos
+"+"             { return '+'; }
+"-"             { return '-'; }
+"*"             { return '*'; }
+"/"             { return '/'; }
+"\\"            { return DIV_INT; } /* divisao inteira                   */
+"%"             { return MOD; }     /* modulo / resto da divisao         */
+"^"             { return '^'; }     /* potenciacao                       */
+
+"("             { return '('; }
+")"             { return ')'; }
+"["             { return '['; }
+"]"             { return ']'; }
+","             { return ','; }
+":"             { return ':'; }
+"."             { return '.'; }
+
+\n              { return EOL; }     /* fim de linha                      */
+
+ /* Qualquer outro caractere: deixa o parser decidir */
+.               { return yytext[0]; }
 
 %%
 
-/* strdup portátil */
+/* strdup portatil */
 static char *xstrdup(const char *s) {
     size_t n = strlen(s) + 1;
     char *p = malloc(n);
-    if (!p) { 
-        fprintf(stderr, "Erro fatal: sem memoria\n"); 
-        exit(1); 
+    if (!p) {
+        fprintf(stderr, "Erro fatal: sem memoria\n");
+        exit(1);
     }
     memcpy(p, s, n);
     return p;
